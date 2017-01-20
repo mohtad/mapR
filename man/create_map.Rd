@@ -4,27 +4,35 @@
 \alias{create_map}
 \title{Add together two numbers.}
 \usage{
-create_map(data, shape_zcta, shape_roads, zcta_names, map_center, dist_center,
-  locations, legend_title, zoom)
+create_map(data, shape_zcta, shape_roads, zcta, map_center, dist_center,
+  locations, legend_title, zoom = NULL, color_bins = c("#ececec", "#fcc5c0",
+  "#fa9fb5", "#f768a1", "#c51b8a", "#7a0177"), show_zcta_label = TRUE)
 }
 \arguments{
-\item{shape_roads}{road data}
+\item{data}{Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.}
 
-\item{directory}{where do save the map png}
+\item{shape_zcta}{Dataset containing the shapes of the ZIP Code Tabulation Area.}
 
-\item{mapname}{file name}
+\item{shape_roads}{Dataset containing the shapes of the principal roads.}
 
-\item{legendtitle}{color bar legend title}
+\item{zcta}{Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.}
 
-\item{metric}{heatmap metric}
+\item{map_center}{Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.}
 
-\item{zipdata}{zip data}
+\item{dist_center}{Distance defining the map bounding box. The height(distance top-bot) of the map is equal to 2 times dist_center.}
 
-\item{venue}{venue location}
+\item{locations}{Dataset containing a list of locations to be plotted on the map. Each location is defined by Lat/Long Coordinates and a label.
+Must be a data.frame with three mandatory columns: name, lat, and long.}
 
-\item{distvenue}{size of the map}
+\item{legend_title}{Metric name that is being mapped.}
 
-\item{zipnames}{zip codes}
+\item{zoom}{Map zoom level used by openstreetmap. If null, it is determined automatically. map zoom, an integer from 0 (whole world) to 19 (building).
+Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
+see http://wiki.openstreetmap.org/wiki/Zoom_levels}
+
+\item{color_bins}{List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.}
+
+\item{show_zcta_label}{Display the ZCTA labels on the map.}
 }
 \value{
 a heat map ggplot.

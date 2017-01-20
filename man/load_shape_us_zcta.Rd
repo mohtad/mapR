@@ -4,7 +4,7 @@
 \alias{load_shape_us_zcta}
 \title{loadShape_US_ZCTA import and load a US ZCTA shapefile}
 \usage{
-load_shape_us_zcta()
+load_shape_us_zcta(shape_us_zcta_dir, shape_us_zcta_filename)
 }
 \description{
 loadShape_US_ZCTA import and load a US ZCTA shapefile

@@ -4,7 +4,7 @@
 \alias{load_shape_us_roads}
 \title{loadShape_US_Roads import and load a US Primary Roads shapefile}
 \usage{
-load_shape_us_roads()
+load_shape_us_roads(shape_us_roads_dir, shape_us_roads_filename)
 }
 \description{
 loadShape_US_Roads import and load a US Primary Roads shapefile

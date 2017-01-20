@@ -4,7 +4,7 @@
 \alias{load_us_zcta}
 \title{Retrieve a list of ZCTAs with their spacial coordinates and a computed haversine distance in miles from the map center.}
 \usage{
-load_us_zcta(map_center = NULL)
+load_us_zcta(us_zcta_path, map_center = NULL)
 }
 \value{
 list of US ZCTAs as data.frame

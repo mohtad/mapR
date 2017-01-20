@@ -4,7 +4,7 @@
 \alias{add_bins}
 \title{add Bins}
 \usage{
-add_bins(data, metric)
+add_bins(data, metric, nbins = 6, br = NULL, lab = NULL)
 }
 \description{
 add Bins

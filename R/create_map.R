@@ -1,18 +1,23 @@
 #' Add together two numbers.
 #'
-#' @param directory where do save the map png
-#' @param mapname file name
-#' @param legendtitle color bar legend title
-#' @param metric heatmap metric
-#' @param zipdata zip data
-#' @param shape_roads road data
-#' @param venue venue location
-#' @param distvenue size of the map
-#' @param zipnames zip codes
+#' @param data Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.
+#' @param shape_zcta Dataset containing the shapes of the ZIP Code Tabulation Area.
+#' @param shape_roads Dataset containing the shapes of the principal roads.
+#' @param zcta Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.
+#' @param map_center Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.
+#' @param dist_center Distance defining the map bounding box. The height(distance top-bot) of the map is equal to 2 times dist_center.
+#' @param locations Dataset containing a list of locations to be plotted on the map. Each location is defined by Lat/Long Coordinates and a label.
+#' Must be a data.frame with three mandatory columns: name, lat, and long.
+#' @param legend_title Metric name that is being mapped.
+#' @param zoom Map zoom level used by openstreetmap. If null, it is determined automatically. map zoom, an integer from 0 (whole world) to 19 (building).
+#' Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
+#' see http://wiki.openstreetmap.org/wiki/Zoom_levels
+#' @param color_bins List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.
+#' @param show_zcta_label Display the ZCTA labels on the map.
 #' @return a heat map ggplot.
 #' @examples
 #' @export
-create_map<- function(data, shape_zcta, shape_roads,zcta, map_center,  dist_center, locations, legend_title, zoom, color_bins, show_zcta_label=TRUE){
+create_map<- function(data, shape_zcta, shape_roads,zcta, map_center,  dist_center, locations, legend_title, zoom=NULL, color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), show_zcta_label=TRUE){
 
   print('define the canvas and bounding box')
   dist_lat = dist_center/0.000621371

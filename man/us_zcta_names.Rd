@@ -6,6 +6,9 @@
 \usage{
 us_zcta_names(US_ZCTA)
 }
+\value{
+
+}
 \description{
 us_zcta_names within 25miles radius of the center of the map. remove close zipcodes.
 }

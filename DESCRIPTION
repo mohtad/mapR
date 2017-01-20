@@ -1,11 +1,10 @@
 Package: mapR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Tool for Creating Spacial Heat Map for Marketers
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Mohtadi Nadjar
+Maintainer: Mohtadi Nadjar <mohtadi.nadjar@ticketmaster.com>
+Description: Tool for helping to import Shapefiles(including Zip Code Tabulation Area, and Major Roads), and creating a heat map for a given metric classified as bins.
 Depends:
     rgdal,
     OpenStreetMap,
@@ -17,7 +16,7 @@ Depends:
     ggplot2,
     dplyr,
     binr
-License: What license is it under?
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
