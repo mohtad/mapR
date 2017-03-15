@@ -1,9 +1,9 @@
 #' Add together two numbers.
 #'
 #' @param data Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.
-#' @param shape_zcta Dataset containing the shapes of the ZIP Code Tabulation Area.
+#' @param shape_boundaries Dataset containing the spacial representation of geographic areas(ZIP Code Tabulation Area). Dataset is retrieved as followed: shape_zcta<-load_shape_us_zcta(shape_us_zcta_dir, shape_us_zcta_filename).
 #' @param shape_roads Dataset containing the shapes of the principal roads.
-#' @param zcta Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.
+#' @param boundaries_coords Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.
 #' @param map_center Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.
 #' @param dist_center Distance defining the map bounding box. The height(distance top-bot) of the map is equal to 2 times dist_center.
 #' @param locations Dataset containing a list of locations to be plotted on the map. Each location is defined by Lat/Long Coordinates and a label.
@@ -13,11 +13,11 @@
 #' Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
 #' see http://wiki.openstreetmap.org/wiki/Zoom_levels
 #' @param color_bins List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.
-#' @param show_zcta_label Display the ZCTA labels on the map.
+#' @param show_boundaries_label Display the boundaries labels on the map(ex: zip codes).
 #' @return a heat map ggplot.
 #' @examples
 #' @export
-create_map<- function(data, shape_zcta, shape_roads,zcta, map_center,  dist_center, locations, legend_title, zoom=NULL, color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), show_zcta_label=TRUE){
+create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map_center,  dist_center, locations, legend_title, zoom=NULL, color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), show_boundaries_label=TRUE){
 
   print('define the canvas and bounding box')
   dist_lat = dist_center/0.000621371
@@ -44,16 +44,17 @@ create_map<- function(data, shape_zcta, shape_roads,zcta, map_center,  dist_cent
   c_mer_long_right = mercator(c(c_long_right,c_lat_top))[1]
   c_mer_long_left = mercator(c(c_long_left,c_lat_top))[1]
 
-  print('apply canvas filters to ZCTA shape data')
+  print('apply canvas filters to boundary shape data')
 
-  data_zcta <- inner_join(data, zcta,c("zipcode" = "code"))
-  data_zcta <-data_zcta[data_zcta$dist_to_center<dist_canvas,]
-  data_zcta$lat<-NULL
-  data_zcta$long<-NULL
-  data_zcta <- inner_join(data_zcta, shape_zcta,c("zipcode" = "id"))
+  data_boundaries <- inner_join(data, boundaries_coords,c("zipcode" = "code"))
+  data_boundaries <-data_boundaries[data_boundaries$dist_to_center<dist_canvas,]
+  data_boundaries$lat<-NULL
+  data_boundaries$long<-NULL
+  data_boundaries <- inner_join(data_boundaries, shape_boundaries,c("zipcode" = "id"))
 
-  print('apply canvas filters to ROADS shape data')
 
+
+  if(shape_roads)
   data_roads = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
 
   #zoom<-10
@@ -66,13 +67,18 @@ create_map<- function(data, shape_zcta, shape_roads,zcta, map_center,  dist_cent
 
   p <-autoplot(map_longlat)
 
-  print('draw the zcta shapes')
+  print('draw the boundaries polygons')
 
-  p = p+ geom_polygon(data = data_zcta, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),color='black',size=0.05, alpha=0.7)
+  p = p+ geom_polygon(data = data_boundaries, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),color='black',size=0.05, alpha=0.7)
 
-  print('draw the roads shapes')
 
-  p = p+ geom_path(data=data_roads,size=0.5, aes(x=long,y=lat,group=group),color="steelblue4")
+  if(shape_roads)
+  {
+    print('apply canvas filters to ROADS shape data')
+    data_roads = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
+    print('draw the roads shapes')
+    p = p+ geom_path(data=data_roads,size=0.5, aes(x=long,y=lat,group=group),color="steelblue4")
+  }
 
   #http://sape.inf.usi.ch/quick-reference/ggplot2/colour
   #color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177")
@@ -111,13 +117,13 @@ create_map<- function(data, shape_zcta, shape_roads,zcta, map_center,  dist_cent
                plot.background = element_rect(fill = "transparent",colour = NA),
                legend.background = element_rect(fill = "transparent",colour = NA))
 
-  if(show_zcta_label){
+  if(show_boundaries_label){
 
-    print('draw the zip codes labels')
+    print('draw the boundaries labels')
 
-    c_zcta = zcta[zcta$mer_long>=c_mer_long_left & zcta$mer_long<=c_mer_long_right & zcta$mer_lat>=c_mer_lat_bot & zcta$mer_lat<=c_mer_lat_top,]
-    zcta_names = us_zcta_names(c_zcta)
-    p = p+ geom_text(data=zcta_names, aes(mer_long, mer_lat, label = code), size=2)
+    c_boundaries = boundaries_coords[boundaries_coords$mer_long>=c_mer_long_left & boundaries_coords$mer_long<=c_mer_long_right & boundaries_coords$mer_lat>=c_mer_lat_bot & zcboundaries_coordsta$mer_lat<=c_mer_lat_top,]
+    boundaries_names = us_zcta_names(c_boundaries)
+    p = p+ geom_text(data=boundaries_names, aes(mer_long, mer_lat, label = code), size=2)
   }
   print('done')
   return (p)
