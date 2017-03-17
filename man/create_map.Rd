@@ -4,18 +4,19 @@
 \alias{create_map}
 \title{Add together two numbers.}
 \usage{
-create_map(data, shape_zcta, shape_roads, zcta, map_center, dist_center,
-  locations, legend_title, zoom = NULL, color_bins = c("#ececec", "#fcc5c0",
-  "#fa9fb5", "#f768a1", "#c51b8a", "#7a0177"), show_zcta_label = TRUE)
+create_map(data, shape_boundaries, shape_roads, boundaries_coords, map_center,
+  dist_center, locations, legend_title, zoom = NULL,
+  color_bins = c("#ececec", "#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a",
+  "#7a0177"), show_boundaries_label = TRUE)
 }
 \arguments{
 \item{data}{Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.}
 
-\item{shape_zcta}{Dataset containing the shapes of the ZIP Code Tabulation Area.}
+\item{shape_boundaries}{Dataset containing the spacial representation of geographic areas(ZIP Code Tabulation Area). Dataset is retrieved as followed: shape_zcta<-load_shape_us_zcta(shape_us_zcta_dir, shape_us_zcta_filename).}
 
 \item{shape_roads}{Dataset containing the shapes of the principal roads.}
 
-\item{zcta}{Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.}
+\item{boundaries_coords}{Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.}
 
 \item{map_center}{Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.}
 
@@ -32,7 +33,7 @@ see http://wiki.openstreetmap.org/wiki/Zoom_levels}
 
 \item{color_bins}{List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.}
 
-\item{show_zcta_label}{Display the ZCTA labels on the map.}
+\item{show_boundaries_label}{Display the boundaries labels on the map(ex: zip codes).}
 }
 \value{
 a heat map ggplot.

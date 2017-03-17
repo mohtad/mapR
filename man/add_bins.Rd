@@ -6,7 +6,13 @@
 \usage{
 add_bins(data, metric, nbins = 6, br = NULL, lab = NULL)
 }
+\value{
+
+}
 \description{
 add Bins
+}
+\examples{
+
 }
 
