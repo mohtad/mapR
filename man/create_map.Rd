@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_map.R
 \name{create_map}
 \alias{create_map}
-\title{Add together two numbers.}
+\title{Create spacial heat map}
 \usage{
 create_map(data, shape_boundaries, shape_roads, boundaries_coords, map_center,
   dist_center, locations, legend_title, zoom = NULL,
@@ -36,9 +36,12 @@ see http://wiki.openstreetmap.org/wiki/Zoom_levels}
 \item{show_boundaries_label}{Display the boundaries labels on the map(ex: zip codes).}
 }
 \value{
-a heat map ggplot.
+a ggplot object
 }
 \description{
-Add together two numbers.
+Create a spacial heat map using layered on top of an Open Street Map. The heat map is generated using spacial boundaries such as ZCTAs for the US or
+}
+\examples{
+
 }
 

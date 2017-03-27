@@ -5,13 +5,13 @@ Version: 0.1.0
 Author: Mohtadi Nadjar
 Maintainer: Mohtadi Nadjar <mohtadi.nadjar@ticketmaster.com>
 Description: Tool for helping to import Shapefiles(including Zip Code Tabulation Area, and Major Roads), and creating a heat map for a given metric classified as bins.
-Depends:
+Depends: R (>= 2.14.1)
+Imports:
     rgdal,
+    sp,
     OpenStreetMap,
     broom,
     maptools,
-    RJDBC,
-    RODBC,
     geosphere,
     ggplot2,
     dplyr,

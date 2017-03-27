@@ -1,4 +1,6 @@
-#' Add together two numbers.
+#' Create spacial heat map
+#'
+#' @description Create a spacial heat map using layered on top of an Open Street Map. The heat map is generated using spacial boundaries such as ZCTAs for the US or
 #'
 #' @param data Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.
 #' @param shape_boundaries Dataset containing the spacial representation of geographic areas(ZIP Code Tabulation Area). Dataset is retrieved as followed: shape_zcta<-load_shape_us_zcta(shape_us_zcta_dir, shape_us_zcta_filename).
@@ -14,9 +16,18 @@
 #' see http://wiki.openstreetmap.org/wiki/Zoom_levels
 #' @param color_bins List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.
 #' @param show_boundaries_label Display the boundaries labels on the map(ex: zip codes).
-#' @return a heat map ggplot.
+#'
+#' @return a ggplot object
+#'
 #' @examples
+#'
 #' @export
+#'
+#' @importFrom geosphere destPoint mercator
+#' @importFrom dplyr inner_join
+#' @importFrom OpenStreetMap openmap openproj autoplot.OpenStreetMap
+#' @import ggplot2
+#'
 create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map_center,  dist_center, locations, legend_title, zoom=NULL, color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), show_boundaries_label=TRUE){
 
   print('define the canvas and bounding box')
@@ -46,16 +57,11 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
 
   print('apply canvas filters to boundary shape data')
 
-  data_boundaries <- inner_join(data, boundaries_coords,c("zipcode" = "code"))
+  data_boundaries <- inner_join(data, boundaries_coords,c("id"))
   data_boundaries <-data_boundaries[data_boundaries$dist_to_center<dist_canvas,]
   data_boundaries$lat<-NULL
   data_boundaries$long<-NULL
-  data_boundaries <- inner_join(data_boundaries, shape_boundaries,c("zipcode" = "id"))
-
-
-
-  if(shape_roads)
-  data_roads = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
+  data_boundaries <- inner_join(data_boundaries, shape_boundaries,c("id"))
 
   #zoom<-10
   print('get the open street map and transform the map from the lat-lont projection to the mercator projection')
@@ -72,12 +78,12 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
   p = p+ geom_polygon(data = data_boundaries, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),color='black',size=0.05, alpha=0.7)
 
 
-  if(shape_roads)
+  if(!is.null(shape_roads))
   {
     print('apply canvas filters to ROADS shape data')
-    data_roads = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
+    shape_roads.cv = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
     print('draw the roads shapes')
-    p = p+ geom_path(data=data_roads,size=0.5, aes(x=long,y=lat,group=group),color="steelblue4")
+    p = p+ geom_path(data=shape_roads.cv,size=0.5, aes(x=long,y=lat,group=group),color="steelblue4")
   }
 
   #http://sape.inf.usi.ch/quick-reference/ggplot2/colour
@@ -99,8 +105,8 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
     })
     locations$mer_lat = mer[2,]
     locations$mer_long = mer[1,]
-    rm(mer)
-    p = p+ geom_point(data = locations, aes(x = mer_long, y = mer_lat, color = name), alpha = 1, fill = "white", pch = 21, size = 3,stroke = 1)
+    print(locations)
+    p = p+ geom_point(data = locations, aes(x = mer_long, y = mer_lat, color = name), alpha = 1, fill = "	#FFFF00", pch = 21, size = 3,stroke = 1)
   }
 
   print('apply the bounding box')
@@ -117,13 +123,15 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
                plot.background = element_rect(fill = "transparent",colour = NA),
                legend.background = element_rect(fill = "transparent",colour = NA))
 
-  if(show_boundaries_label){
 
+  if(show_boundaries_label){
     print('draw the boundaries labels')
 
-    c_boundaries = boundaries_coords[boundaries_coords$mer_long>=c_mer_long_left & boundaries_coords$mer_long<=c_mer_long_right & boundaries_coords$mer_lat>=c_mer_lat_bot & zcboundaries_coordsta$mer_lat<=c_mer_lat_top,]
-    boundaries_names = us_zcta_names(c_boundaries)
-    p = p+ geom_text(data=boundaries_names, aes(mer_long, mer_lat, label = code), size=2)
+    boundaries.cv = boundaries_coords[boundaries_coords$mer_long>=c_mer_long_left & boundaries_coords$mer_long<=c_mer_long_right & boundaries_coords$mer_lat>=c_mer_lat_bot & boundaries_coords$mer_lat<=c_mer_lat_top,]
+    print('draw the boundaries labels: boundaries_labels')
+    boundaries.labels = boundaries_coords_filter(boundaries.cv, 1.5)
+    print('draw the boundaries labels: geom_text')
+    p = p+ geom_text(data=boundaries.labels, aes(mer_long, mer_lat, label = id), size=2)
   }
   print('done')
   return (p)
