@@ -6,6 +6,7 @@
 #' @param shape_boundaries Dataset containing the spacial representation of geographic areas(ZIP Code Tabulation Area). Dataset is retrieved as followed: shape_zcta<-load_shape_us_zcta(shape_us_zcta_dir, shape_us_zcta_filename).
 #' @param shape_roads Dataset containing the shapes of the principal roads.
 #' @param boundaries_coords Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.
+#' @param show_boundaries_label Display the boundaries labels on the map(ex: zip codes).
 #' @param map_center Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.
 #' @param dist_center Distance defining the map bounding box. The height(distance top-bot) of the map is equal to 2 times dist_center.
 #' @param locations Dataset containing a list of locations to be plotted on the map. Each location is defined by Lat/Long Coordinates and a label.
@@ -14,23 +15,57 @@
 #' @param zoom Map zoom level used by openstreetmap. If null, it is determined automatically. map zoom, an integer from 0 (whole world) to 19 (building).
 #' Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
 #' see http://wiki.openstreetmap.org/wiki/Zoom_levels
+#' @param color_boundaries Color of the boundaries(shape_boundaries). RGB('#xxxxxx) or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.
 #' @param color_bins List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.
-#' @param show_boundaries_label Display the boundaries labels on the map(ex: zip codes).
+#' @param color_roads Color of the roads(shape_roads).
 #'
 #' @return a ggplot object
-#'
-#' @examples
-#'
 #' @export
 #'
+#'
+#' @examples
+#' #USA ZCTA
+#' Download shapefile(.shp) from http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_zcta510_500k.zip
+#' unzip cb_2015_us_zcta510_500k.zip in C:/SHAPEFILES/ZCTA
+#' shape_dir = "C:/SHAPEFILES/ZCTA"
+#' shape_filename = "cb_2015_us_zcta510_500k"
+#' identifier = "ZCTA5CE10"
+#' shape_boundaries<-shapefile_to_df(shape_dir, shape_filename,identifier)
+#'
+#' #USA Primary Roads
+#' Download shapefile(.shp) from http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_zcta510_500k.zip
+#' unzip tl_2016_us_primaryroads.zip in C:/SHAPEFILES/us_primaryroads
+#' shape_dir = "C:/SHAPEFILES/us_primaryroads"
+#' shape_filename = "tl_2016_us_primaryroads"
+#' identifier = "FULLNAME"
+#' shape_roads<-shapefile_to_df(shape_dir, shape_filename,identifier)
+#'
+#' locations = data.frame(name=c("Children's Mercy Park"), long = c(-94.823686), lat = c(39.121296) )
+#' map_center = data.frame(long = c(-94.823686), lat = c(39.121296))
+#' boundaries_coords<-boundaries_coords.shape(shape_boundaries, map_center)
+#' boundaries_coords100<-boundaries_coords[boundaries_coords$dist_to_center<100,]
+#' data = data.frame(id = boundaries_coords100$id, value = sample(100, size = nrow(boundaries_coords100), replace = TRUE))
+#' data$bin <- create_bins(data$value,nbins=6)
+#'
+#' dist_center<-25
+#' legend_title<-'random value'
+#' zoom<-10
+#' color_bins<-c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177")
+#' p<-create_map(data=data, shape_boundaries=shape_boundaries, shape_roads=NULL,boundaries_coords=boundaries_coords,  show_boundaries_label=TRUE, map_center,  dist_center, locations, legend_title, zoom, color_boundaries = 'grey100', color_bins = color_bins, color_roads = 'chartreuse')
+#' p
+
 #' @importFrom geosphere destPoint mercator
 #' @importFrom dplyr inner_join
 #' @importFrom OpenStreetMap openmap openproj autoplot.OpenStreetMap
 #' @import ggplot2
 #'
-create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map_center,  dist_center, locations, legend_title, zoom=NULL, color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), show_boundaries_label=TRUE){
+create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, show_boundaries_label=TRUE, map_center,  dist_center, locations, legend_title, zoom=10, color_boundaries = 'black',color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), color_roads = 'steelblue4'){
 
-  print('define the canvas and bounding box')
+  if(!"id" %in% colnames(data)) print('ERROR: data doesnt have a column id')
+  if(!"id" %in% colnames(shape_boundaries)) print('ERROR: shape_boundaries doesnt have a column id')
+  if(!"id" %in% colnames(boundaries_coords)) print('ERROR: boundaries_coords doesnt have a column id')
+
+  # define the canvas and bounding box
   dist_lat = dist_center/0.000621371
   dist_long = dist_center*(1.5)/0.000621371
   dist_canvas = dist_long + 50 #(dist_center+50)/0.000621371
@@ -55,35 +90,34 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
   c_mer_long_right = mercator(c(c_long_right,c_lat_top))[1]
   c_mer_long_left = mercator(c(c_long_left,c_lat_top))[1]
 
-  print('apply canvas filters to boundary shape data')
-
+  # apply canvas filters to boundary shape data
   data_boundaries <- inner_join(data, boundaries_coords,c("id"))
+  if(nrow(data_boundaries)==0) print('ERROR: No match found between data and boundaries_coords. Check the column id values')
   data_boundaries <-data_boundaries[data_boundaries$dist_to_center<dist_canvas,]
   data_boundaries$lat<-NULL
   data_boundaries$long<-NULL
   data_boundaries <- inner_join(data_boundaries, shape_boundaries,c("id"))
+  if(nrow(data_boundaries)==0) print('ERROR: No match found between data and shape_boundaries Check the column id values')
 
-  #zoom<-10
-  print('get the open street map and transform the map from the lat-lont projection to the mercator projection')
-
+  # get the open street map and transform the map from the lat-lont projection to the mercator projection
   mp <- openmap(c(bb_lat_top,bb_long_left), c(bb_lat_bot,bb_long_right), type="maptoolkit-topo", zoom = zoom)
   map_longlat <- openproj(mp,projection = osm())
 
-  print('draw the map using ggplot2')
-
+  # draw the map using ggplot2
   p <-autoplot(map_longlat)
 
-  print('draw the boundaries polygons')
-
-  p = p+ geom_polygon(data = data_boundaries, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),color='black',size=0.05, alpha=0.7)
-
+  #draw the boundaries polygons
+  if(!is.null(color_boundaries))
+    p = p+ geom_polygon(data = data_boundaries, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),color=color_boundaries,size=0.05, alpha=0.7)
+  else
+    p = p+ geom_polygon(data = data_boundaries, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),size=0.05, alpha=0.7)
 
   if(!is.null(shape_roads))
   {
     print('apply canvas filters to ROADS shape data')
     shape_roads.cv = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
-    print('draw the roads shapes')
-    p = p+ geom_path(data=shape_roads.cv,size=0.5, aes(x=long,y=lat,group=group),color="steelblue4")
+    # draw the roads shapes
+    p = p+ geom_path(data=shape_roads.cv,size=0.5, aes(x=long,y=lat,group=group),color=color_roads)
   }
 
   #http://sape.inf.usi.ch/quick-reference/ggplot2/colour
@@ -106,15 +140,12 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
     locations$mer_lat = mer[2,]
     locations$mer_long = mer[1,]
     print(locations)
-    p = p+ geom_point(data = locations, aes(x = mer_long, y = mer_lat, color = name), alpha = 1, fill = "	#FFFF00", pch = 21, size = 3,stroke = 1)
+    p = p+ geom_point(data = locations, aes(x = mer_long, y = mer_lat, color = name), alpha = 1, fill = "#FFFF00", pch = 21, size = 3,stroke = 1)
   }
-
-  print('apply the bounding box')
-
+  # apply the bounding box
   p = p+ coord_fixed(xlim = c(bb_mer_long_left, bb_mer_long_right),  ylim = c(bb_mer_lat_bot, bb_mer_lat_top))
 
-  print('define the plot theme')
-
+  # define the plot theme
   p = p+ labs(x=NULL,y=NULL)
   p = p+ theme(axis.text=element_blank(),axis.ticks=element_blank(),
                legend.key = element_rect(colour = "transparent", fill = "transparent"),
@@ -124,16 +155,15 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, map
                legend.background = element_rect(fill = "transparent",colour = NA))
 
 
-  if(show_boundaries_label){
+  if(show_boundaries_label == TRUE){
     print('draw the boundaries labels')
 
     boundaries.cv = boundaries_coords[boundaries_coords$mer_long>=c_mer_long_left & boundaries_coords$mer_long<=c_mer_long_right & boundaries_coords$mer_lat>=c_mer_lat_bot & boundaries_coords$mer_lat<=c_mer_lat_top,]
-    print('draw the boundaries labels: boundaries_labels')
+    # draw the boundaries labels: boundaries_labels
     boundaries.labels = boundaries_coords_filter(boundaries.cv, 1.5)
-    print('draw the boundaries labels: geom_text')
+    # draw the boundaries labels: geom_text
     p = p+ geom_text(data=boundaries.labels, aes(mer_long, mer_lat, label = id), size=2)
   }
-  print('done')
   return (p)
   #path<-paste(directory, mapname, ".png", sep = "")
   #ggsave(path, plot = p, device = "png", width = 10, height = 6.5, bg = "transparent")

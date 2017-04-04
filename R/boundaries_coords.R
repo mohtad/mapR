@@ -85,9 +85,9 @@ boundaries_coords.df<-function(data,map_center=NULL){
 }
 
 #'
-#' Remove the overlapping boundaries
+#' Internal method(do not use). Remove the overlapping boundaries
 #'
-#' @description Dirty way to detect overlapping boundaries and only return one. Used in boundary label creation in heatmap.
+#' @description Internal method(do not use). Dirty way to detect overlapping boundaries and only return one. Used in boundary label creation in heatmap.
 #'
 #' @param boundaries_coords List of boundaries and coordinates as a dataframe (id, lat, long)
 #' @param distance distance in miles. If two boundaries are within 'distance', then one of the two boundaries is filtered out.

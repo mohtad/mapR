@@ -8,6 +8,7 @@ Description: Tool for helping to import Shapefiles(including Zip Code Tabulation
 Depends: R (>= 2.14.1)
 Imports:
     rgdal,
+    gpclib,
     sp,
     OpenStreetMap,
     broom,
@@ -19,4 +20,4 @@ Imports:
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
