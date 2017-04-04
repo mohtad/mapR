@@ -23,4 +23,3 @@ map_center = data.frame(long = c(-94.823686), lat = c(39.121296) )
 boundaries_coords<-boundaries_coords.df(data, map_center)
 
 }
-

@@ -29,4 +29,3 @@ data<-data.frame(x =floor(exp(rnorm(200000 * 1.3))))
 data$bin <- create_bins(data$x, nbins=NULL, bins=list(breaks=c(-1,0,1,35,61,92,130), labels=c("0","1","2 to 35","36 to 61","62 to 92","93 to 130")))
 
 }
-

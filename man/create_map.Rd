@@ -4,10 +4,11 @@
 \alias{create_map}
 \title{Create spacial heat map}
 \usage{
-create_map(data, shape_boundaries, shape_roads, boundaries_coords, map_center,
-  dist_center, locations, legend_title, zoom = NULL,
+create_map(data, shape_boundaries, shape_roads, boundaries_coords,
+  show_boundaries_label = TRUE, map_center, dist_center, locations,
+  legend_title, zoom = 10, color_boundaries = "black",
   color_bins = c("#ececec", "#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a",
-  "#7a0177"), show_boundaries_label = TRUE)
+  "#7a0177"), color_roads = "steelblue4")
 }
 \arguments{
 \item{data}{Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.}
@@ -17,6 +18,8 @@ create_map(data, shape_boundaries, shape_roads, boundaries_coords, map_center,
 \item{shape_roads}{Dataset containing the shapes of the principal roads.}
 
 \item{boundaries_coords}{Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.}
+
+\item{show_boundaries_label}{Display the boundaries labels on the map(ex: zip codes).}
 
 \item{map_center}{Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.}
 
@@ -31,9 +34,11 @@ Must be a data.frame with three mandatory columns: name, lat, and long.}
 Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
 see http://wiki.openstreetmap.org/wiki/Zoom_levels}
 
+\item{color_boundaries}{Color of the boundaries(shape_boundaries). RGB('#xxxxxx) or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.}
+
 \item{color_bins}{List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.}
 
-\item{show_boundaries_label}{Display the boundaries labels on the map(ex: zip codes).}
+\item{color_roads}{Color of the roads(shape_roads).}
 }
 \value{
 a ggplot object
@@ -42,6 +47,33 @@ a ggplot object
 Create a spacial heat map using layered on top of an Open Street Map. The heat map is generated using spacial boundaries such as ZCTAs for the US or
 }
 \examples{
+#USA ZCTA
+Download shapefile(.shp) from http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_zcta510_500k.zip
+unzip cb_2015_us_zcta510_500k.zip in C:/SHAPEFILES/ZCTA
+shape_dir = "C:/SHAPEFILES/ZCTA"
+shape_filename = "cb_2015_us_zcta510_500k"
+identifier = "ZCTA5CE10"
+shape_boundaries<-shapefile_to_df(shape_dir, shape_filename,identifier)
 
+#USA Primary Roads
+Download shapefile(.shp) from http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_zcta510_500k.zip
+unzip tl_2016_us_primaryroads.zip in C:/SHAPEFILES/us_primaryroads
+shape_dir = "C:/SHAPEFILES/us_primaryroads"
+shape_filename = "tl_2016_us_primaryroads"
+identifier = "FULLNAME"
+shape_roads<-shapefile_to_df(shape_dir, shape_filename,identifier)
+
+locations = data.frame(name=c("Children's Mercy Park"), long = c(-94.823686), lat = c(39.121296) )
+map_center = data.frame(long = c(-94.823686), lat = c(39.121296))
+boundaries_coords<-boundaries_coords.shape(shape_boundaries, map_center)
+boundaries_coords100<-boundaries_coords[boundaries_coords$dist_to_center<100,]
+data = data.frame(id = boundaries_coords100$id, value = sample(100, size = nrow(boundaries_coords100), replace = TRUE))
+data$bin <- create_bins(data$value,nbins=6)
+
+dist_center<-25
+legend_title<-'random value'
+zoom<-10
+color_bins<-c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177")
+p<-create_map(data=data, shape_boundaries=shape_boundaries, shape_roads=NULL,boundaries_coords=boundaries_coords,  show_boundaries_label=TRUE, map_center,  dist_center, locations, legend_title, zoom, color_boundaries = 'grey100', color_bins = color_bins, color_roads = 'chartreuse')
+p
 }
-

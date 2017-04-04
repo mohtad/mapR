@@ -2,7 +2,7 @@
 % Please edit documentation in R/boundaries_coords.R
 \name{boundaries_coords_filter}
 \alias{boundaries_coords_filter}
-\title{Remove the overlapping boundaries}
+\title{Internal method(do not use). Remove the overlapping boundaries}
 \usage{
 boundaries_coords_filter(boundaries_coords, distance)
 }
@@ -15,9 +15,8 @@ boundaries_coords_filter(boundaries_coords, distance)
 List of boundaries and coordinates as a dataframe
 }
 \description{
-Dirty way to detect overlapping boundaries and only return one. Used in boundary label creation in heatmap.
+Internal method(do not use). Dirty way to detect overlapping boundaries and only return one. Used in boundary label creation in heatmap.
 }
 \examples{
 
 }
-
