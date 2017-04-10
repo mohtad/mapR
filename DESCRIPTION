@@ -8,7 +8,7 @@ Description: Tool for helping to import Shapefiles(including Zip Code Tabulation
 Depends: R (>= 2.14.1)
 Imports:
     rgdal,
-    gpclib,
+    rgeos,
     sp,
     OpenStreetMap,
     broom,
