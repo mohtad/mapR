@@ -41,7 +41,7 @@
 #' identifier = "FULLNAME"
 #' shape_roads<-shapefile_to_df(shape_dir, shape_filename,identifier)
 #'
-#' @import gpclib
+#' @import rgeos
 #' @importFrom rgdal readOGR
 #' @importFrom sp spTransform
 #' @importFrom broom tidy
