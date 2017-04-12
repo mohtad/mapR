@@ -5,10 +5,10 @@
 \title{Create spacial heat map}
 \usage{
 create_map(data, shape_boundaries, shape_roads, boundaries_coords,
-  show_boundaries_label = TRUE, map_center, dist_center, locations,
-  legend_title, zoom = 10, color_boundaries = "black",
-  color_bins = c("#ececec", "#fcc5c0", "#fa9fb5", "#f768a1", "#c51b8a",
-  "#7a0177"), color_roads = "steelblue4")
+  show_boundaries_label = TRUE, show_boundaries_label_dist = 1.5,
+  map_center, dist_center, locations, legend_title, zoom = 10,
+  color_boundaries = "black", color_bins = c("#ececec", "#fcc5c0",
+  "#fa9fb5", "#f768a1", "#c51b8a", "#7a0177"), color_roads = "steelblue4")
 }
 \arguments{
 \item{data}{Dataset to use for plot. Must be a data.frame with two mandatory columns: zipcode and bins.}
@@ -20,6 +20,8 @@ create_map(data, shape_boundaries, shape_roads, boundaries_coords,
 \item{boundaries_coords}{Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.}
 
 \item{show_boundaries_label}{Display the boundaries labels on the map(ex: zip codes).}
+
+\item{show_boundaries_label_dist}{Distance within which only one out of two labels will be shown.}
 
 \item{map_center}{Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.}
 
@@ -34,7 +36,7 @@ Must be a data.frame with three mandatory columns: name, lat, and long.}
 Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
 see http://wiki.openstreetmap.org/wiki/Zoom_levels}
 
-\item{color_boundaries}{Color of the boundaries(shape_boundaries). RGB('#xxxxxx) or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.}
+\item{color_boundaries}{Color of the boundaries(shape_boundaries). RGB('#xxxxxx). http://colorbrewer2.org or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.}
 
 \item{color_bins}{List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.}
 

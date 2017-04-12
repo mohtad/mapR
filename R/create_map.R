@@ -7,6 +7,7 @@
 #' @param shape_roads Dataset containing the shapes of the principal roads.
 #' @param boundaries_coords Dataset with the ZCTA code name and the associated (Lat,Long) coordinates.
 #' @param show_boundaries_label Display the boundaries labels on the map(ex: zip codes).
+#' @param show_boundaries_label_dist Distance within which only one out of two labels will be shown.
 #' @param map_center Coordinates(Latitude/Longitude) of the map center to be drawn. Must be a data.frame with two mandatory columns: lat and long.
 #' @param dist_center Distance defining the map bounding box. The height(distance top-bot) of the map is equal to 2 times dist_center.
 #' @param locations Dataset containing a list of locations to be plotted on the map. Each location is defined by Lat/Long Coordinates and a label.
@@ -15,7 +16,7 @@
 #' @param zoom Map zoom level used by openstreetmap. If null, it is determined automatically. map zoom, an integer from 0 (whole world) to 19 (building).
 #' Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
 #' see http://wiki.openstreetmap.org/wiki/Zoom_levels
-#' @param color_boundaries Color of the boundaries(shape_boundaries). RGB('#xxxxxx) or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.
+#' @param color_boundaries Color of the boundaries(shape_boundaries). RGB('#xxxxxx). http://colorbrewer2.org or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.
 #' @param color_bins List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.
 #' @param color_roads Color of the roads(shape_roads).
 #'
@@ -59,11 +60,13 @@
 #' @importFrom OpenStreetMap openmap openproj autoplot.OpenStreetMap
 #' @import ggplot2
 #'
-create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, show_boundaries_label=TRUE, map_center,  dist_center, locations, legend_title, zoom=10, color_boundaries = 'black',color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), color_roads = 'steelblue4'){
+create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, show_boundaries_label=TRUE, show_boundaries_label_dist=1.5,map_center,  dist_center, locations, legend_title, zoom=10, color_boundaries = 'black',color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), color_roads = 'steelblue4'){
 
   if(!"id" %in% colnames(data)) print('ERROR: data doesnt have a column id')
+  if(!"bin" %in% colnames(data)) print('ERROR: data doesnt have a column bin')
   if(!"id" %in% colnames(shape_boundaries)) print('ERROR: shape_boundaries doesnt have a column id')
   if(!"id" %in% colnames(boundaries_coords)) print('ERROR: boundaries_coords doesnt have a column id')
+
 
   # define the canvas and bounding box
   dist_lat = dist_center/0.000621371
@@ -160,7 +163,7 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
 
     boundaries.cv = boundaries_coords[boundaries_coords$mer_long>=c_mer_long_left & boundaries_coords$mer_long<=c_mer_long_right & boundaries_coords$mer_lat>=c_mer_lat_bot & boundaries_coords$mer_lat<=c_mer_lat_top,]
     # draw the boundaries labels: boundaries_labels
-    boundaries.labels = boundaries_coords_filter(boundaries.cv, 1.5)
+    boundaries.labels = boundaries_coords_filter(boundaries.cv, show_boundaries_label_dist)
     # draw the boundaries labels: geom_text
     p = p+ geom_text(data=boundaries.labels, aes(mer_long, mer_lat, label = id), size=2)
   }

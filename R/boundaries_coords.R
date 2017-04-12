@@ -25,18 +25,27 @@ boundaries_coords.shape<-function(shape_boundaries,map_center=NULL){
   longlat = apply(boundaries_i,1,function(x){
     mer_lat=as.numeric(x['mer_lat']);
     mer_long=as.numeric(x['mer_long']);
-    mercator(c(mer_long,mer_lat),TRUE)
+    result<-mercator(c(mer_long,mer_lat),TRUE)
+    if(!is.null(map_center)){
+      long = result[1,]
+      lat = longlat[2,]
+      dist = distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
+      result<- cbind(result,dist)
+    }
+    return(result)
   })
   boundaries_i$long = longlat[1,]
   boundaries_i$lat = longlat[2,]
-
   if(!is.null(map_center)){
-    boundaries_i$dist_to_center = apply(boundaries_i,1,function(x){
-      lat=as.numeric(x['lat']);
-      long=as.numeric(x['long']);
-      distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
-  })
+    boundaries_i$dist_to_center = longlat[3,]
   }
+#  if(!is.null(map_center)){
+#    boundaries_i$dist_to_center = apply(boundaries_i,1,function(x){
+#      lat=as.numeric(x['lat']);
+#      long=as.numeric(x['long']);
+#      distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
+#  })
+#  }
   return (boundaries_i)
 }
 
@@ -65,22 +74,32 @@ boundaries_coords.df<-function(data,map_center=NULL){
   #boundaries_i<- read.csv(path, sep = "", colClasses=c("GEOID"="character"))
   #boundaries_i$GEOID<-as.character(boundaries_i$GEOID)
   #boundaries_i = data.frame(code=boundaries_i$GEOID,lat=boundaries_i$INTPTLAT,long=boundaries_i$INTPTLONG,stringsAsFactors = FALSE)
+  print("new version of boundaries_coords.df")
   boundaries_i<-data
   mer = apply(boundaries_i,1,function(x){
     lat=as.numeric(x['lat']);
     long=as.numeric(x['long']);
-    mer<-mercator(c(long,lat))
-  })
-  boundaries_i$mer_lat = mer[2,]
-  boundaries_i$mer_long = mer[1,]
+    result<-mercator(c(long,lat))
+    if(!is.null(map_center)){
+      dist = distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
+      result<- cbind(result,dist)
+    }
+    return(result)
 
+  })
+  boundaries_i$mer_long = mer[1,]
+  boundaries_i$mer_lat = mer[2,]
   if(!is.null(map_center)){
-    boundaries_i$dist_to_center = apply(boundaries_i,1,function(x){
-      lat=as.numeric(x['lat']);
-      long=as.numeric(x['long']);
-      distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
-    })
+    boundaries_i$dist_to_center = mer[3,]
   }
+
+#  if(!is.null(map_center)){
+#    boundaries_i$dist_to_center = apply(boundaries_i,1,function(x){
+#      lat=as.numeric(x['lat']);
+#      long=as.numeric(x['long']);
+#      distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
+#    })
+#  }
   return (boundaries_i)
 }
 
