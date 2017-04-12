@@ -22,6 +22,7 @@ boundaries_coords.shape<-function(shape_boundaries,map_center=NULL){
   shape_boundaries_by_id <- group_by(shape_boundaries, id)
   boundaries_i <- summarise(shape_boundaries_by_id, mer_lat=mean(lat), mer_long = mean(long))
 
+  #the zipcode coordinates are mercator coordinates, so we need to compute the spherical long/lat coordinate
   longlat = apply(boundaries_i,1,function(x){
     mer_lat=as.numeric(x['mer_lat']);
     mer_long=as.numeric(x['mer_long']);
@@ -74,7 +75,8 @@ boundaries_coords.df<-function(data,map_center=NULL){
   #boundaries_i<- read.csv(path, sep = "", colClasses=c("GEOID"="character"))
   #boundaries_i$GEOID<-as.character(boundaries_i$GEOID)
   #boundaries_i = data.frame(code=boundaries_i$GEOID,lat=boundaries_i$INTPTLAT,long=boundaries_i$INTPTLONG,stringsAsFactors = FALSE)
-  print("new version of boundaries_coords.df")
+
+  #the zipcode coordinates are sperical long/lat coordinates, so we need to compute the mercator coordinates.
   boundaries_i<-data
   mer = apply(boundaries_i,1,function(x){
     lat=as.numeric(x['lat']);
