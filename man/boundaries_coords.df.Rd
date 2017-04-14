@@ -15,7 +15,7 @@ boundaries_coords.df(data, map_center = NULL)
 list of spacial coordinates(lat/long and mercator) and a distance as data.frame
 }
 \description{
-Retrieve a list of mercator boundaries with their spacial coordinates and a computed haversine distance in miles from the map center. Boundaries are defined in a shapefile dataframe(see method: shape_boundaries) as a list of vertices coordinates. The boundaries spacial coordinates is the center of gravity of its vertices.
+Retrieve a list of mercator boundaries with their spacial coordinates(lat/long and mercator) and a computed haversine distance in miles from the map center.
 }
 \examples{
 data = data.frame(long = c(-94.823686, -94), lat = c(39.121296, 39) )

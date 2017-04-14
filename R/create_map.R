@@ -69,6 +69,7 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
 
 
   # define the canvas and bounding box
+  print('define the canvas and bounding box')
   dist_lat = dist_center/0.000621371
   dist_long = dist_center*(1.5)/0.000621371
   dist_canvas = dist_long + 50 #(dist_center+50)/0.000621371
@@ -103,6 +104,7 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
   if(nrow(data_boundaries)==0) print('ERROR: No match found between data and shape_boundaries Check the column id values')
 
   # get the open street map and transform the map from the lat-lont projection to the mercator projection
+  print('open source map')
   mp <- openmap(c(bb_lat_top,bb_long_left), c(bb_lat_bot,bb_long_right), type="maptoolkit-topo", zoom = zoom)
   map_longlat <- openproj(mp,projection = osm())
 
@@ -110,6 +112,7 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
   p <-autoplot(map_longlat)
 
   #draw the boundaries polygons
+  print('draw the boundaries')
   if(!is.null(color_boundaries))
     p = p+ geom_polygon(data = data_boundaries, aes_string(x = 'long', y = 'lat', group = 'group', fill = 'bin'),color=color_boundaries,size=0.05, alpha=0.7)
   else
@@ -117,7 +120,7 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
 
   if(!is.null(shape_roads))
   {
-    print('apply canvas filters to ROADS shape data')
+    print('draw the roads')
     shape_roads.cv = shape_roads[shape_roads$long>=c_mer_long_left & shape_roads$long<=c_mer_long_right & shape_roads$lat>=c_mer_lat_bot & shape_roads$lat<=c_mer_lat_top,]
     # draw the roads shapes
     p = p+ geom_path(data=shape_roads.cv,size=0.5, aes(x=long,y=lat,group=group),color=color_roads)
@@ -142,10 +145,10 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
     })
     locations$mer_lat = mer[2,]
     locations$mer_long = mer[1,]
-    print(locations)
     p = p+ geom_point(data = locations, aes(x = mer_long, y = mer_lat, color = name), alpha = 1, fill = "#FFFF00", pch = 21, size = 3,stroke = 1)
   }
   # apply the bounding box
+  print('apply the bounding box')
   p = p+ coord_fixed(xlim = c(bb_mer_long_left, bb_mer_long_right),  ylim = c(bb_mer_lat_bot, bb_mer_lat_top))
 
   # define the plot theme

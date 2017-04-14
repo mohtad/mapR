@@ -28,8 +28,8 @@ boundaries_coords.shape<-function(shape_boundaries,map_center=NULL){
     mer_long=as.numeric(x['mer_long']);
     result<-mercator(c(mer_long,mer_lat),TRUE)
     if(!is.null(map_center)){
-      long = result[1,]
-      lat = longlat[2,]
+      long = result[1]
+      lat = result[2]
       dist = distm (c(map_center$long, map_center$lat), c(long,lat), fun = distHaversine)*0.000621371;
       result<- cbind(result,dist)
     }
@@ -53,7 +53,7 @@ boundaries_coords.shape<-function(shape_boundaries,map_center=NULL){
 #'
 #' Retrieve a list of boundaries' spacial mercator coordinates for a list of boundaries lat/long coordinates.
 #'
-#' @description Retrieve a list of mercator boundaries with their spacial coordinates and a computed haversine distance in miles from the map center. Boundaries are defined in a shapefile dataframe(see method: shape_boundaries) as a list of vertices coordinates. The boundaries spacial coordinates is the center of gravity of its vertices.
+#' @description Retrieve a list of mercator boundaries with their spacial coordinates(lat/long and mercator) and a computed haversine distance in miles from the map center.
 #'
 #' @param data List of Longitude/latitude coordinates of the boundaries. The Dataset is a data.frame containing a set of three columns (id, long, lat). 'id' is a unique representation of the boundary(ex: ZCTA, FSA). 'id' type is character.
 #' @param map_center Spacial coordinates of a map center. The haversine distance in miles is computed if map_center is defined.
@@ -70,12 +70,6 @@ boundaries_coords.shape<-function(shape_boundaries,map_center=NULL){
 #' @importFrom geosphere mercator distm distHaversine
 #'
 boundaries_coords.df<-function(data,map_center=NULL){
-  print('boundaries_coords.df')
-  #boundaries_i<- read.csv("C:/Users/Mohtadi.Nadjar/heatmapR/Template/zcta_coordinates/2015_Gaz_zcta_national.txt", sep = "", colClasses=c("GEOID"="character"))
-  #boundaries_i<- read.csv(path, sep = "", colClasses=c("GEOID"="character"))
-  #boundaries_i$GEOID<-as.character(boundaries_i$GEOID)
-  #boundaries_i = data.frame(code=boundaries_i$GEOID,lat=boundaries_i$INTPTLAT,long=boundaries_i$INTPTLONG,stringsAsFactors = FALSE)
-
   #the zipcode coordinates are sperical long/lat coordinates, so we need to compute the mercator coordinates.
   boundaries_i<-data
   mer = apply(boundaries_i,1,function(x){
