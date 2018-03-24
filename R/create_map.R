@@ -16,6 +16,9 @@
 #' @param zoom Map zoom level used by openstreetmap. If null, it is determined automatically. map zoom, an integer from 0 (whole world) to 19 (building).
 #' Recommended values: If dist_center = 25miles, zoom=11. If dist_center = 50miles, zoom=10
 #' see http://wiki.openstreetmap.org/wiki/Zoom_levels
+#' @param type the tile server from which to get the map, or the url pattern. type = c("osm", "osm-bw","maptoolkit-topo",
+#' "waze", "bing", "stamen-toner", "stamen-terrain","stamen-watercolor", "osm-german", "osm-wanderreitkarte", "mapbox",
+#' "esri","esri-topo", "nps", "apple-iphoto", "skobbler", "hillshade", "opencyclemap","osm-transport", "osm-public-transport", "osm-bbike", "osm-bbike-german")
 #' @param color_boundaries Color of the boundaries(shape_boundaries). RGB('#xxxxxx). http://colorbrewer2.org or http://sape.inf.usi.ch/quick-reference/ggplot2/colour. Set to NULL to not show.
 #' @param color_bins List of colors used in the color scale bar. if N bins are used, then N colors should be defined. As default 6 bins so 6 colors are used.
 #' @param color_roads Color of the roads(shape_roads).
@@ -51,8 +54,9 @@
 #' dist_center<-25
 #' legend_title<-'random value'
 #' zoom<-10
+#' type = 'osm'
 #' color_bins<-c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177")
-#' p<-create_map(data=data, shape_boundaries=shape_boundaries, shape_roads=NULL,boundaries_coords=boundaries_coords,  show_boundaries_label=TRUE, map_center,  dist_center, locations, legend_title, zoom, color_boundaries = 'grey100', color_bins = color_bins, color_roads = 'chartreuse')
+#' p<-create_map(data=data, shape_boundaries=shape_boundaries, shape_roads=NULL,boundaries_coords=boundaries_coords,  show_boundaries_label=TRUE, map_center,  dist_center, locations, legend_title, zoom, type, color_boundaries = 'grey100', color_bins = color_bins, color_roads = 'chartreuse')
 #' p
 
 #' @importFrom geosphere destPoint mercator
@@ -60,7 +64,7 @@
 #' @importFrom OpenStreetMap openmap openproj autoplot.OpenStreetMap
 #' @import ggplot2
 #'
-create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, show_boundaries_label=TRUE, show_boundaries_label_dist=1.5,map_center,  dist_center, locations, legend_title, zoom=10, color_boundaries = 'black',color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), color_roads = 'steelblue4'){
+create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, show_boundaries_label=TRUE, show_boundaries_label_dist=1.5,map_center,  dist_center, locations, legend_title, zoom=10, type = 'osm', color_boundaries = 'black',color_bins = c("#ececec","#fcc5c0","#fa9fb5","#f768a1","#c51b8a","#7a0177"), color_roads = 'steelblue4'){
 
   if(!"id" %in% colnames(data)) print('ERROR: data doesnt have a column id')
   if(!"bin" %in% colnames(data)) print('ERROR: data doesnt have a column bin')
@@ -105,7 +109,7 @@ create_map<- function(data, shape_boundaries, shape_roads,boundaries_coords, sho
 
   # get the open street map and transform the map from the lat-lont projection to the mercator projection
   print('open source map')
-  mp <- openmap(c(bb_lat_top,bb_long_left), c(bb_lat_bot,bb_long_right), type="maptoolkit-topo", zoom = zoom)
+  mp <- openmap(c(bb_lat_top,bb_long_left), c(bb_lat_bot,bb_long_right), type = type, zoom = zoom)
   map_longlat <- openproj(mp,projection = osm())
 
   # draw the map using ggplot2
